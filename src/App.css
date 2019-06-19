@@ -19,9 +19,16 @@ html, body {
 #root {
     height: 100vh;
     width: 100vw;
+    text-align: center;
 }
 
-.flower {
+.full {
     width: 100%;
     height: 100%;
+    padding: 1em;
+    box-sizing: border-box;
+}
+
+canvas {
+    cursor: pointer;
 }
