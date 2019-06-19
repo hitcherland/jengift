@@ -63,17 +63,19 @@ class Cloth extends React.Component {
             pinholes: pinholes,
             pinholeNeighbours: neighbours,
             paths: [],
-            width: this.props.width,
-            height: this.props.height,
+            width: this.props.width || 64,
+            height: this.props.height || 64,
             resizeListener: undefined,
             threadCount: threadCount,
             borderSize: border,
+            numThreads: this.props.numThreads || 5,
+            numCurves: this.props.numCurves || 5
         }
 
         var needleIndex = Math.floor(Math.floor(Math.random() * this.state.pinholes.length))
-        for(var thread_index=0; thread_index<5; thread_index++) {
+        for(var thread_index=0; thread_index<this.state.numThreads; thread_index++) {
             var path = [needleIndex];
-            for(var thread_goal_iter=0; thread_goal_iter<5; thread_goal_iter++) {
+            for(var thread_goal_iter=0; thread_goal_iter<this.state.numCurves; thread_goal_iter++) {
                 var goalIndex = Math.floor(Math.random() * this.state.pinholes.length);
                 var goalPath = this.getPathBetweenPoints(needleIndex, goalIndex);
                 path = path.concat(goalPath);
@@ -124,9 +126,11 @@ class Cloth extends React.Component {
     }
 
     resize() {
+        var par = this.refs.canvas.parentElement;
+        console.log(par.clientWidth, par.clientHeight);
         this.setState({
-            width: window.innerWidth,
-            height: window.innerHeight
+            width: par.clientWidth,
+            height: par.clientHeight
         }, () => this.draw())
     }
 
@@ -158,7 +162,7 @@ class Cloth extends React.Component {
             ctx.fill();
         }
 
-        ctx.lineWidth = radius / 250;
+        ctx.lineWidth = radius / 150;
         for(var path of this.state.paths) {
             ctx.strokeStyle = path.color;
             
@@ -199,7 +203,9 @@ class Cloth extends React.Component {
 
 function App() {
   return (
-    <Cloth width="64" height="64" />
+      <div className="flower">
+        <Cloth numThreads="50"/>
+      </div>
   );
 }
 
