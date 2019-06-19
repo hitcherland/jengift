@@ -2,74 +2,170 @@ import React from 'react';
 import './App.css';
 
 class Cloth extends React.Component {
+    getPinholes(threadCount, border) {
+        const r = 1 - border * 2;
+        const dr = 2 * r / threadCount;
+        var output = [];
+        for(var x=-r; x<=r; x+=dr) {
+            for(var y=-r; y<r; y+=dr) {
+                var dx = 0.002 * (Math.random() - 0.5);
+                var dy = 0.002 * (Math.random() - 0.5);
+                output.push({x: x + dx, y: y + dy});
+            }
+        }
+        return output;
+    }
+
+    getPinholeNeighbours(pinholes) {
+        var neighbours = {}
+        var l = pinholes.length; 
+        var L = Math.sqrt(l);
+        var x = null;
+        for(var i=0; i<l; i++) {
+            neighbours[i] = [];
+            if(i + 1 % L > i) {
+                neighbours[i].push(i + 1);
+                if((i + 1 + L) < l )
+                    neighbours[i].push(i + L + 1);
+
+                if((i + 1 - L) >= 0 )
+                    neighbours[i].push(i - L + 1);
+            }
+
+            if((i - 1 + L) % L < i) {
+                neighbours[i].push(i - 1);
+
+                if((i - 1 + L) < l )
+                    neighbours[i].push(i + L - 1);
+
+                if((i - 1 - L) >= 0 )
+                    neighbours[i].push(i - L - 1);
+            }
+
+            if(i + L < l)
+                neighbours[i].push(i + L);
+
+            if(i - L >= 0)
+                neighbours[i].push(i - L);
+
+        }
+        return neighbours
+    }
+
     constructor(props) {
         super(props)
+        var threadCount = this.props.threadCount || 200;
+        var border = this.props.border || 0.02;
+        var pinholes = this.getPinholes(threadCount, border);
+        var neighbours = this.getPinholeNeighbours(pinholes);
+
         this.state = {
-            pinholes: [],
+            pinholes: pinholes,
+            pinholeNeighbours: neighbours,
             paths: [],
-        }
-    
-        var dr = 0.03;
-        var r = 0.94;
-        for(var x=-r; x<=r; x+=dr) {
-            var abs_y = Math.sqrt(Math.pow(r, 2) - Math.pow(x, 2));
-            for(var y=-abs_y; y<abs_y; y+=dr) {
-                var dx = 0.001 * (Math.random() - 0.5);
-                var dy = 0.001 * (Math.random() - 0.5);
-                this.state.pinholes.push({x: x + dx, y: y + dy});
-            }
+            width: this.props.width,
+            height: this.props.height,
+            resizeListener: undefined,
+            threadCount: threadCount,
+            borderSize: border,
         }
 
-        for(var i=0; i<3; i++) {
-            var path = [];
-            for(var j=0; j<30; j++) {
-                path.push(Math.floor(Math.floor(Math.random() * this.state.pinholes.length)));
+        var needleIndex = Math.floor(Math.floor(Math.random() * this.state.pinholes.length))
+        for(var thread_index=0; thread_index<5; thread_index++) {
+            var path = [needleIndex];
+            for(var thread_goal_iter=0; thread_goal_iter<5; thread_goal_iter++) {
+                var goalIndex = Math.floor(Math.random() * this.state.pinholes.length);
+                var goalPath = this.getPathBetweenPoints(needleIndex, goalIndex);
+                path = path.concat(goalPath);
+                needleIndex = goalIndex;
             }
-            this.state.paths.push(path);
+            this.state.paths.push({
+                path: path,
+                color: this.getRandomColor()
+            });
         }
     }
 
-    componentDidMount() {
+    getNextPinhole(i, goal) {
+        var min = this.state.pinholeNeighbours[i].reduce((o, v) => {
+            var ph = this.state.pinholes[v];
+            var dist_to_goal = Math.sqrt(Math.pow(ph.x - goal.x, 2) + Math.pow(ph.y - goal.y, 2));
+            if(dist_to_goal < o[0])
+                return [dist_to_goal, v];
+            else
+                return o;
+        }, [100000, undefined]);
+        return min[1];
+    }
+
+    getPathBetweenPoints(index_a, index_b) {
+        var output = [index_a];
+        var goal = this.state.pinholes[index_b];
+        var next = index_a;
+
+        while(true) {
+            next = this.getNextPinhole(next, goal); 
+            if(next === index_b)
+                break;
+            output.push(next);
+        }
+
+        output.push(index_b);
+        return output;
+    }
+
+    getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    resize() {
+        this.setState({
+            width: window.innerWidth,
+            height: window.innerHeight
+        }, () => this.draw())
+    }
+
+    draw() {
         const canvas = this.refs.canvas;
         const ctx = canvas.getContext("2d");
-
-        const midX = this.props.width / 2;
-        const midY = this.props.height / 2;
-        const radius = Math.min(midX, midY);
+        const midX = this.state.width / 2;
+        const midY = this.state.height / 2;
+        const radius = Math.min(midX, midY) * 0.9;
+        const innerRadius = (1.0 - this.state.borderSize * 2) * radius;
 
         ctx.fillStyle = '#c19a6b';
         ctx.beginPath();
-        ctx.arc(midX, midY, radius, 0, 2 * Math.PI);
+        ctx.rect(midX - radius, midY - radius, 2 * radius, 2 * radius);
         ctx.fill();
 
         ctx.fillStyle = '#F1F1D4';
         ctx.beginPath();
-        ctx.arc(midX, midY, radius * 0.95, 0, 2 * Math.PI);
+        ctx.rect(midX - innerRadius, midY - innerRadius, 2 * innerRadius, 2 * innerRadius);
         ctx.fill();
 
-        for(var pinhole of this.state.pinholes) {
-            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        for(var i=0; i<this.state.pinholes.length; i++) {
+            var pinhole = this.state.pinholes[i];
+            ctx.fillStyle = '#FFF';
+            var x = midX + radius * pinhole.x;
+            var y = midY + radius * pinhole.y;
             ctx.beginPath();
-            ctx.arc(midX + radius * pinhole.x, midY + radius * pinhole.y, 1, 0, 2 * Math.PI);
+            ctx.arc(x, y, radius / 250, 0, 2 * Math.PI);
             ctx.fill();
         }
 
-        function getRandomColor() {
-          var letters = '0123456789ABCDEF';
-          var color = '#';
-          for (var i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-          }
-          return color;
-        }
-
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = radius / 250;
         for(var path of this.state.paths) {
-            ctx.strokeStyle = getRandomColor();
+            ctx.strokeStyle = path.color;
+            
             ctx.beginPath();
             var begin=true
 
-            for(var pathIndex of path) {
+            for(var pathIndex of path.path) {
                 var point = this.state.pinholes[pathIndex];
                 var x = midX + radius * point.x;
                 var y = midY + radius * point.y;
@@ -84,11 +180,19 @@ class Cloth extends React.Component {
         }
     }
 
+    componentDidMount() {
+        this.resize();
+        this.setState({
+            resizeListener: window.addEventListener("resize", () => this.resize())
+        });
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.state.resizeListener);
+    };
+
     render() {
-        var style = { 
-            background: this.props.background || "white"
-        };
-        var canvas = <canvas ref="canvas" width={this.props.width} height={this.props.height} style={style}></canvas>;
+        var canvas = <canvas ref="canvas" width={this.state.width} height={this.state.height}></canvas>;
         return canvas;
     }
 }

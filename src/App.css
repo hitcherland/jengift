@@ -1,33 +1,17 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+html, body {
+    margin: 0;
+    overflow: hidden;
+    background:
+    radial-gradient(hsl(0, 0%, 27%) 4%, hsl(0, 0%, 18%) 9%, hsla(0, 0%, 20%, 0) 9%) 0 0,
+    radial-gradient(hsl(0, 0%, 27%) 4%, hsl(0, 0%, 18%) 8%, hsla(0, 0%, 20%, 0) 10%) 50px 50px,
+    radial-gradient(hsla(0, 0%, 30%, 0.8) 20%, hsla(0, 0%, 20%, 0)) 50px 0,
+    radial-gradient(hsla(0, 0%, 30%, 0.8) 20%, hsla(0, 0%, 20%, 0)) 0 50px,
+    radial-gradient(hsla(0, 0%, 20%, 1) 35%, hsla(0, 0%, 20%, 0) 60%) 50px 0,
+    radial-gradient(hsla(0, 0%, 20%, 1) 35%, hsla(0, 0%, 20%, 0) 60%) 100px 50px,
+    radial-gradient(hsla(0, 0%, 15%, 0.7), hsla(0, 0%, 20%, 0)) 0 0,
+    radial-gradient(hsla(0, 0%, 15%, 0.7), hsla(0, 0%, 20%, 0)) 50px 50px,
+    linear-gradient(45deg, hsla(0, 0%, 20%, 0) 49%, hsla(0, 0%, 0%, 1) 50%, hsla(0, 0%, 20%, 0) 70%) 0 0,
+    linear-gradient(-45deg, hsla(0, 0%, 20%, 0) 49%, hsla(0, 0%, 0%, 1) 50%, hsla(0, 0%, 20%, 0) 70%) 0 0;
+    background-color: #300;
+    background-size: 100px 100px;
 }
