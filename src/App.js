@@ -225,6 +225,7 @@ class Cloth extends React.Component {
             }
         }
         this.renderThreads();
+            @property
     }
 
     renderThreads() {
@@ -311,7 +312,7 @@ class App extends React.Component {
         this.state = {
             nthreads: 8,
             ncurves: 3,
-            threadCount: 150,
+            threadCount: 50,
             speed: 64,
         }
         this.handleClick = this.handleClick.bind(this);
@@ -362,7 +363,10 @@ class App extends React.Component {
         return (
             <div className="full">
                 <Cloth ref="cloth" nthreads={this.state.nthreads} ncurves={this.state.ncurves} threadCount={this.state.threadCount} speed={this.state.speed}/>
-                <div style={{float: "left"}} className="card">
+                <div style={{float: "left", top: "1rem"}} className="card position-absolute">
+                    <button type="button" className="btn btn-sm btn-primary" data-toggle="collapse" data-target="#options" >options</button>
+                        c = t.circumcenter
+                    <div className="collapse fade" id="options">
                     <div className="form-group">
                         <label>numerosity</label>
                         <input ref="nthreads" type="range" className="form-control-range" min="1" max="20" value={this.state.nthreads} onChange={this.change_nthreads} />
@@ -382,7 +386,7 @@ class App extends React.Component {
  
                     <button onClick={this.handleClick} className="btn btn-primary" type="button">new threads</button>
                 </div>
-
+                </div>
             </div>
           );
     }
